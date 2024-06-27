@@ -103,7 +103,7 @@ def test_should_check_connectivity_by_default(monkeypatch) -> None:
     arguments = [
         '--language', 'english',
         'existing-mnemonic',
-        '--eth1_withdrawal_address', '',
+        '--withdrawal_address', '',
         '--folder', my_folder_path,
 
     ]
@@ -137,7 +137,7 @@ def test_should_not_check_connectivity_with_ignore_connectivity(monkeypatch) -> 
         '--language', 'english',
         '--ignore_connectivity',
         'existing-mnemonic',
-        '--eth1_withdrawal_address', '',
+        '--withdrawal_address', '',
         '--folder', my_folder_path,
 
     ]
@@ -173,7 +173,7 @@ def test_should_not_check_connectivity_with_non_interactive(monkeypatch) -> None
         '--validator_start_index', '0',
         '--chain', 'mainnet',
         '--keystore_password', 'MyPassword',
-        '--eth1_withdrawal_address', '',
+        '--withdrawal_address', '',
         '--folder', my_folder_path,
     ]
     result = runner.invoke(cli, arguments)
@@ -210,7 +210,7 @@ def test_should_not_check_connectivity_with_both_non_interactive_or_ignore_conne
         '--validator_start_index', '0',
         '--chain', 'mainnet',
         '--keystore_password', 'MyPassword',
-        '--eth1_withdrawal_address', '',
+        '--withdrawal_address', '',
         '--folder', my_folder_path,
     ]
     result = runner.invoke(cli, arguments)

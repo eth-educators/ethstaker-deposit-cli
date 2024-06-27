@@ -11,13 +11,13 @@
     "validate_choice": {
         "err_invalid_choice": "That is not one of the valid choices. Please retype your choice."
     },
-    "validate_eth1_withdrawal_address": {
+    "validate_withdrawal_address": {
         "err_invalid_ECDSA_hex_addr": "The given execution address is not in hexadecimal encoded form.",
         "err_invalid_ECDSA_hex_addr_checksum": "The given execution address is not in checksum form.",
         "msg_ECDSA_hex_addr_withdrawal": "**[Warning] you are setting an execution address as your withdrawal address. Please ensure that you have control over this address.**"
     },
     "validate_bls_withdrawal_credentials": {
-        "err_is_already_eth1_form": "The given withdrawal credentials is already in 0x01 form. Have you already set the withdrawal address?",
+        "err_is_already_01_form": "The given withdrawal credentials is already in 0x01 form. Have you already set the withdrawal address?",
         "err_not_bls_form": "The given withdrawal credentials is not in BLS_WITHDRAWAL_PREFIX form."
     },
     "validate_bls_withdrawal_credentials_matching": {

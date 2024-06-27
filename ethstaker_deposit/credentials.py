@@ -21,7 +21,7 @@ from ethstaker_deposit.key_handling.keystore import (
 from ethstaker_deposit.settings import DEPOSIT_CLI_VERSION, BaseChainSetting
 from ethstaker_deposit.utils.constants import (
     BLS_WITHDRAWAL_PREFIX,
-    ETH1_ADDRESS_WITHDRAWAL_PREFIX,
+    EXECUTION_ADDRESS_WITHDRAWAL_PREFIX,
     ETH2GWEI,
     MAX_DEPOSIT_AMOUNT,
     MIN_DEPOSIT_AMOUNT,
@@ -41,7 +41,7 @@ from ethstaker_deposit.utils.ssz import (
 
 class WithdrawalType(Enum):
     BLS_WITHDRAWAL = 0
-    ETH1_ADDRESS_WITHDRAWAL = 1
+    EXECUTION_ADDRESS_WITHDRAWAL = 1
 
 
 class Credential:
@@ -51,7 +51,7 @@ class Credential:
     """
     def __init__(self, *, mnemonic: str, mnemonic_password: str,
                  index: int, amount: int, chain_setting: BaseChainSetting,
-                 hex_eth1_withdrawal_address: Optional[HexAddress],
+                 hex_withdrawal_address: Optional[HexAddress],
                  use_pbkdf2: Optional[bool] = False):
         # Set path as EIP-2334 format
         # https://eips.ethereum.org/EIPS/eip-2334
@@ -67,7 +67,7 @@ class Credential:
             mnemonic=mnemonic, path=self.signing_key_path, password=mnemonic_password)
         self.amount = amount
         self.chain_setting = chain_setting
-        self.hex_eth1_withdrawal_address = hex_eth1_withdrawal_address
+        self.hex_withdrawal_address = hex_withdrawal_address
         self.use_pbkdf2 = use_pbkdf2
 
     @property
@@ -79,15 +79,15 @@ class Credential:
         return bls.SkToPk(self.withdrawal_sk)
 
     @property
-    def eth1_withdrawal_address(self) -> Optional[Address]:
-        if self.hex_eth1_withdrawal_address is None:
+    def withdrawal_address(self) -> Optional[Address]:
+        if self.hex_withdrawal_address is None:
             return None
-        return to_canonical_address(self.hex_eth1_withdrawal_address)
+        return to_canonical_address(self.hex_withdrawal_address)
 
     @property
     def withdrawal_prefix(self) -> bytes:
-        if self.eth1_withdrawal_address is not None:
-            return ETH1_ADDRESS_WITHDRAWAL_PREFIX
+        if self.withdrawal_address is not None:
+            return EXECUTION_ADDRESS_WITHDRAWAL_PREFIX
         else:
             return BLS_WITHDRAWAL_PREFIX
 
@@ -95,8 +95,8 @@ class Credential:
     def withdrawal_type(self) -> WithdrawalType:
         if self.withdrawal_prefix == BLS_WITHDRAWAL_PREFIX:
             return WithdrawalType.BLS_WITHDRAWAL
-        elif self.withdrawal_prefix == ETH1_ADDRESS_WITHDRAWAL_PREFIX:
-            return WithdrawalType.ETH1_ADDRESS_WITHDRAWAL
+        elif self.withdrawal_prefix == EXECUTION_ADDRESS_WITHDRAWAL_PREFIX:
+            return WithdrawalType.EXECUTION_ADDRESS_WITHDRAWAL
         else:
             raise ValueError(f"Invalid withdrawal_prefix {self.withdrawal_prefix.hex()}")
 
@@ -106,12 +106,12 @@ class Credential:
             withdrawal_credentials = BLS_WITHDRAWAL_PREFIX
             withdrawal_credentials += SHA256(self.withdrawal_pk)[1:]
         elif (
-            self.withdrawal_type == WithdrawalType.ETH1_ADDRESS_WITHDRAWAL
-            and self.eth1_withdrawal_address is not None
+            self.withdrawal_type == WithdrawalType.EXECUTION_ADDRESS_WITHDRAWAL
+            and self.withdrawal_address is not None
         ):
-            withdrawal_credentials = ETH1_ADDRESS_WITHDRAWAL_PREFIX
+            withdrawal_credentials = EXECUTION_ADDRESS_WITHDRAWAL_PREFIX
             withdrawal_credentials += b'\x00' * 11
-            withdrawal_credentials += self.eth1_withdrawal_address
+            withdrawal_credentials += self.withdrawal_address
         else:
             raise ValueError(f"Invalid withdrawal_type {self.withdrawal_type}")
         return withdrawal_credentials
@@ -170,7 +170,7 @@ class Credential:
         return self.signing_sk == int.from_bytes(secret_bytes, 'big')
 
     def get_bls_to_execution_change(self, validator_index: int) -> SignedBLSToExecutionChange:
-        if self.eth1_withdrawal_address is None:
+        if self.withdrawal_address is None:
             raise ValueError("The execution address should NOT be empty.")
         if self.chain_setting.GENESIS_VALIDATORS_ROOT is None:
             raise ValidationError("The genesis validators root should NOT be empty "
@@ -179,7 +179,7 @@ class Credential:
         message = BLSToExecutionChange(  # type: ignore[no-untyped-call]
             validator_index=validator_index,
             from_bls_pubkey=self.withdrawal_pk,
-            to_execution_address=self.eth1_withdrawal_address,
+            to_execution_address=self.withdrawal_address,
         )
         domain = compute_bls_to_execution_change_domain(
             fork_version=self.chain_setting.GENESIS_FORK_VERSION,
@@ -270,7 +270,7 @@ class CredentialList:
                       amounts: List[int],
                       chain_setting: BaseChainSetting,
                       start_index: int,
-                      hex_eth1_withdrawal_address: Optional[HexAddress],
+                      hex_withdrawal_address: Optional[HexAddress],
                       use_pbkdf2: Optional[bool] = False) -> 'CredentialList':
         if len(amounts) != num_keys:
             raise ValueError(
@@ -287,7 +287,7 @@ class CredentialList:
                 'index': index,
                 'amount': amounts[index - start_index],
                 'chain_setting': chain_setting,
-                'hex_eth1_withdrawal_address': hex_eth1_withdrawal_address,
+                'hex_withdrawal_address': hex_withdrawal_address,
                 'use_pbkdf2': use_pbkdf2,
             } for index in key_indices]
 

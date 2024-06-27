@@ -17,7 +17,7 @@
             "confirm": "Anahtar deposu şifrenizi onaylamak için tekrar girin",
             "mismatch": "Hata: girilen değerler eşleşmiyor. Tekrar deneyin."
         },
-        "eth1_withdrawal_address": {
+        "withdrawal_address": {
             "help": "Eğer bu alan girilmiş ve geçerliyse, verilen Ethereum adresi varlık çekme adresi olarak kullanılacaktır. Aksi taktirde, ipucu kelimelerinden üretilmiş bir genel anahtar kullanılır."
         }
     },

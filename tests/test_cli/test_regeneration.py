@@ -38,7 +38,7 @@ def test_regeneration(monkeypatch) -> None:
     arguments = [
         '--ignore_connectivity',
         'new-mnemonic',
-        '--eth1_withdrawal_address', '',
+        '--withdrawal_address', '',
         '--folder', folder_path_1,
     ]
     result = runner.invoke(cli, arguments, input=data)
@@ -69,7 +69,7 @@ def test_regeneration(monkeypatch) -> None:
     arguments = [
         '--ignore_connectivity',
         'existing-mnemonic',
-        '--eth1_withdrawal_address', '',
+        '--withdrawal_address', '',
         '--folder', folder_path_2,
     ]
     result = runner.invoke(cli, arguments, input=data)

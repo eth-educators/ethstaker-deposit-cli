@@ -159,7 +159,7 @@ You can use `new-mnemonic --help` to see all arguments. Note that if there are m
 | `--mnemonic_language` | String. Options: `简体中文`, `繁體中文`, `český jazyk`, `English`, `Italiano`, `한국어`, `Português`, `Español`. Default to `English` | The language of the mnemonic word list |
 | `--folder` | String. Pointing to `./validator_keys` by default | The folder path for the keystore(s) and deposit(s) |
 | `--chain` | String. `mainnet` by default | The chain setting for the signing domain. |
-| `--execution_address` (or `--eth1_withdrawal_address`) | String. Ethereum execution address in hexadecimal encoded form | If this field is set and valid, the given execution address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in [ERC-2334 format](https://eips.ethereum.org/EIPS/eip-2334#eth2-specific-parameters). |
+| `--withdrawal_address` | String. Ethereum execution address in hexadecimal encoded form | If this field is set and valid, the given execution address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in [ERC-2334 format](https://eips.ethereum.org/EIPS/eip-2334#eth2-specific-parameters). |
 | `--pbkdf2` | Flag | Will use pbkdf2 key derivation instead of scrypt for generated keystore files as defined in EIP-2335. This can be a good alternative if you intend to work with a large number of keys. |
 
 ###### `existing-mnemonic` Arguments
@@ -172,7 +172,7 @@ You can use `existing-mnemonic --help` to see all arguments. Note that if there 
 | `--num_validators`  | Non-negative integer | The number of new signing keys you want to generate. Note that the child key(s) are generated via the same master key. |
 | `--folder` | String. Pointing to `./validator_keys` by default | The folder path for the keystore(s) and deposit(s) |
 | `--chain` | String. `mainnet` by default | The chain setting for the signing domain. |
-| `--execution_address` (or `--eth1_withdrawal_address`) | String. Ethereum execution address in hexadecimal encoded form | If this field is set and valid, the given execution address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in [ERC-2334 format](https://eips.ethereum.org/EIPS/eip-2334#eth2-specific-parameters). |
+| `--withdrawal_address` | String. Ethereum execution address in hexadecimal encoded form | If this field is set and valid, the given execution address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in [ERC-2334 format](https://eips.ethereum.org/EIPS/eip-2334#eth2-specific-parameters). |
 | `--pbkdf2` | Flag | Will use pbkdf2 key derivation instead of scrypt for generated keystore files as defined in EIP-2335. This can be a good alternative if you intend to work with a large number of keys. |
 
 ###### Successful message
@@ -203,7 +203,7 @@ You can use `bls-to-execution-change --help` to see all arguments. Note that if 
 | `--validator_start_index` | Non-negative integer | The index position for the keys to start generating withdrawal credentials in [ERC-2334 format](https://eips.ethereum.org/EIPS/eip-2334#eth2-specific-parameters). |
 | `--validator_indices` | String of integer(s) | A list of the chosen validator index number(s) as identified on the beacon chain. Split multiple items with whitespaces or commas. |
 | `--bls_withdrawal_credentials_list` | String of hexstring(s). | A list of the old BLS withdrawal credentials of the given validator(s). It is for confirming you are using the correct keys. Split multiple items with whitespaces or commas. |
-| `--execution_address` (or `--eth1_withdrawal_address`) | String. Ethereum execution address in hexadecimal encoded form | If this field is set and valid, the given execution address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in [ERC-2334 format](https://eips.ethereum.org/EIPS/eip-2334#eth2-specific-parameters). |
+| `--withdrawal_address` | String. Ethereum execution address in hexadecimal encoded form | If this field is set and valid, the given execution address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in [ERC-2334 format](https://eips.ethereum.org/EIPS/eip-2334#eth2-specific-parameters). |
 | `--devnet_chain_setting` | String. JSON string `'{"network_name": "<NETWORK_NAME>", "genesis_fork_version": "<GENESIS_FORK_VERSION>", "exit_fork_version": "<EXIT_FORK_VERSION>", "genesis_validator_root": "<GENESIS_VALIDATOR_ROOT>"}'` | The custom chain setting of a devnet or testnet. Note that it will override your `--chain` choice. |
 
 ###### `exit-transaction-keystore` Arguments

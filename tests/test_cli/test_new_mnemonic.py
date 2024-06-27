@@ -13,7 +13,7 @@ from ethstaker_deposit.key_handling.key_derivation.mnemonic import abbreviate_wo
 from ethstaker_deposit.utils.constants import (
     BLS_WITHDRAWAL_PREFIX,
     DEFAULT_VALIDATOR_KEYS_FOLDER_NAME,
-    ETH1_ADDRESS_WITHDRAWAL_PREFIX,
+    EXECUTION_ADDRESS_WITHDRAWAL_PREFIX,
 )
 from ethstaker_deposit.utils.intl import load_text
 from .helpers import clean_key_folder, get_permissions, get_uuid
@@ -39,7 +39,7 @@ def test_new_mnemonic_bls_withdrawal(monkeypatch) -> None:
     arguments = [
         '--ignore_connectivity',
         'new-mnemonic',
-        '--eth1_withdrawal_address', '',
+        '--withdrawal_address', '',
         '--folder', my_folder_path,
     ]
     result = runner.invoke(cli, arguments, input=data)
@@ -65,7 +65,7 @@ def test_new_mnemonic_bls_withdrawal(monkeypatch) -> None:
     clean_key_folder(my_folder_path)
 
 
-def test_new_mnemonic_eth1_address_withdrawal(monkeypatch) -> None:
+def test_new_mnemonic_withdrawal_address(monkeypatch) -> None:
     # monkeypatch get_mnemonic
     def mock_get_mnemonic(language, words_path, entropy=None) -> str:
         return "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
@@ -79,8 +79,8 @@ def test_new_mnemonic_eth1_address_withdrawal(monkeypatch) -> None:
         os.mkdir(my_folder_path)
 
     runner = CliRunner()
-    eth1_withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
-    inputs = ['english', '1', 'mainnet', 'MyPassword', 'MyPassword', eth1_withdrawal_address, eth1_withdrawal_address,
+    withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
+    inputs = ['english', '1', 'mainnet', 'MyPassword', 'MyPassword', withdrawal_address, withdrawal_address,
               'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about']
     data = '\n'.join(inputs)
     arguments = [
@@ -102,7 +102,7 @@ def test_new_mnemonic_eth1_address_withdrawal(monkeypatch) -> None:
     for deposit in deposits_dict:
         withdrawal_credentials = bytes.fromhex(deposit['withdrawal_credentials'])
         assert withdrawal_credentials == (
-            ETH1_ADDRESS_WITHDRAWAL_PREFIX + b'\x00' * 11 + decode_hex(eth1_withdrawal_address)
+            EXECUTION_ADDRESS_WITHDRAWAL_PREFIX + b'\x00' * 11 + decode_hex(withdrawal_address)
         )
 
     all_uuid = [
@@ -121,7 +121,7 @@ def test_new_mnemonic_eth1_address_withdrawal(monkeypatch) -> None:
     clean_key_folder(my_folder_path)
 
 
-def test_new_mnemonic_eth1_address_withdrawal_bad_checksum(monkeypatch) -> None:
+def test_new_mnemonic_withdrawal_address_bad_checksum(monkeypatch) -> None:
     # monkeypatch get_mnemonic
     def mock_get_mnemonic(language, words_path, entropy=None) -> str:
         return "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
@@ -137,11 +137,11 @@ def test_new_mnemonic_eth1_address_withdrawal_bad_checksum(monkeypatch) -> None:
     runner = CliRunner()
 
     # NOTE: final 'A' needed to be an 'a'
-    wrong_eth1_withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705FA'
-    correct_eth1_withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
+    wrong_withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705FA'
+    correct_withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
 
     inputs = ['english', '1', 'mainnet', 'MyPassword', 'MyPassword',
-              wrong_eth1_withdrawal_address, correct_eth1_withdrawal_address, correct_eth1_withdrawal_address,
+              wrong_withdrawal_address, correct_withdrawal_address, correct_withdrawal_address,
               'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about']
     data = '\n'.join(inputs)
     arguments = [
@@ -163,7 +163,7 @@ def test_new_mnemonic_eth1_address_withdrawal_bad_checksum(monkeypatch) -> None:
     for deposit in deposits_dict:
         withdrawal_credentials = bytes.fromhex(deposit['withdrawal_credentials'])
         assert withdrawal_credentials == (
-            ETH1_ADDRESS_WITHDRAWAL_PREFIX + b'\x00' * 11 + decode_hex(correct_eth1_withdrawal_address)
+            EXECUTION_ADDRESS_WITHDRAWAL_PREFIX + b'\x00' * 11 + decode_hex(correct_withdrawal_address)
         )
 
     all_uuid = [
@@ -182,7 +182,7 @@ def test_new_mnemonic_eth1_address_withdrawal_bad_checksum(monkeypatch) -> None:
     clean_key_folder(my_folder_path)
 
 
-def test_new_mnemonic_eth1_address_withdrawal_alias(monkeypatch) -> None:
+def test_new_mnemonic_withdrawal_address_parameter(monkeypatch) -> None:
     # monkeypatch get_mnemonic
     def mock_get_mnemonic(language, words_path, entropy=None) -> str:
         return "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
@@ -196,8 +196,8 @@ def test_new_mnemonic_eth1_address_withdrawal_alias(monkeypatch) -> None:
         os.mkdir(my_folder_path)
 
     runner = CliRunner()
-    execution_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
-    inputs = [execution_address, 'english', '1', 'mainnet', 'MyPassword', 'MyPassword',
+    withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
+    inputs = [withdrawal_address, 'english', '1', 'mainnet', 'MyPassword', 'MyPassword',
               'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about']
     data = '\n'.join(inputs)
     arguments = [
@@ -205,7 +205,7 @@ def test_new_mnemonic_eth1_address_withdrawal_alias(monkeypatch) -> None:
         '--ignore_connectivity',
         'new-mnemonic',
         '--folder', my_folder_path,
-        '--execution_address', execution_address,  # execution_address and eth1_withdrawal_address are aliases
+        '--withdrawal_address', withdrawal_address,
     ]
     result = runner.invoke(cli, arguments, input=data)
     assert result.exit_code == 0
@@ -220,7 +220,7 @@ def test_new_mnemonic_eth1_address_withdrawal_alias(monkeypatch) -> None:
     for deposit in deposits_dict:
         withdrawal_credentials = bytes.fromhex(deposit['withdrawal_credentials'])
         assert withdrawal_credentials == (
-            ETH1_ADDRESS_WITHDRAWAL_PREFIX + b'\x00' * 11 + decode_hex(execution_address)
+            EXECUTION_ADDRESS_WITHDRAWAL_PREFIX + b'\x00' * 11 + decode_hex(withdrawal_address)
         )
 
     all_uuid = [
@@ -237,38 +237,6 @@ def test_new_mnemonic_eth1_address_withdrawal_alias(monkeypatch) -> None:
 
     # Clean up
     clean_key_folder(my_folder_path)
-
-
-def test_new_mnemonic_eth1_address_withdrawal_double_params(monkeypatch) -> None:
-    # monkeypatch get_mnemonic
-    def mock_get_mnemonic(language, words_path, entropy=None) -> str:
-        return "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
-
-    monkeypatch.setattr(new_mnemonic, "get_mnemonic", mock_get_mnemonic)
-
-    # Prepare folder
-    my_folder_path = os.path.join(os.getcwd(), 'TESTING_TEMP_FOLDER')
-    clean_key_folder(my_folder_path)
-    if not os.path.exists(my_folder_path):
-        os.mkdir(my_folder_path)
-
-    runner = CliRunner()
-    execution_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
-    inputs = [execution_address, 'english', '1', 'mainnet', 'MyPassword', 'MyPassword',
-              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about']
-    data = '\n'.join(inputs)
-    arguments = [
-        '--language', 'english',
-        '--ignore_connectivity',
-        'new-mnemonic',
-        '--folder', my_folder_path,
-        '--execution_address', execution_address,
-        '--eth1_withdrawal_address', execution_address,  # double param
-    ]
-    result = runner.invoke(cli, arguments, input=data)
-
-    # FIXME: Should not allow it
-    assert result.exit_code == 0
 
 
 def test_pbkdf2_new_mnemonic(monkeypatch) -> None:
@@ -298,7 +266,7 @@ def test_pbkdf2_new_mnemonic(monkeypatch) -> None:
     arguments = [
         '--language', 'english',
         'new-mnemonic',
-        '--eth1_withdrawal_address', '',
+        '--withdrawal_address', '',
         '--folder', pbkdf2_folder_path,
         '--pbkdf2',
     ]
@@ -308,7 +276,7 @@ def test_pbkdf2_new_mnemonic(monkeypatch) -> None:
     arguments = [
         '--language', 'english',
         'new-mnemonic',
-        '--eth1_withdrawal_address', '',
+        '--withdrawal_address', '',
         '--folder', scrypt_folder_path,
     ]
     result = runner.invoke(cli, arguments, input=data)
@@ -382,7 +350,7 @@ async def test_script_bls_withdrawal() -> None:
         '--mnemonic_language', 'english',
         '--chain', 'mainnet',
         '--keystore_password', 'MyPassword',
-        '--eth1_withdrawal_address', '""',
+        '--withdrawal_address', '""',
         '--folder', my_folder_path,
     ]
     proc = await asyncio.create_subprocess_shell(
@@ -469,7 +437,7 @@ async def test_script_abbreviated_mnemonic() -> None:
         '--mnemonic_language', 'english',
         '--chain', 'mainnet',
         '--keystore_password', 'MyPassword',
-        '--eth1_withdrawal_address', '""',
+        '--withdrawal_address', '""',
         '--folder', my_folder_path,
     ]
     proc = await asyncio.create_subprocess_shell(

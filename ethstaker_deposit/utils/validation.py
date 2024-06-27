@@ -33,7 +33,7 @@ from ethstaker_deposit.utils.constants import (
     MAX_DEPOSIT_AMOUNT,
     MIN_DEPOSIT_AMOUNT,
     BLS_WITHDRAWAL_PREFIX,
-    ETH1_ADDRESS_WITHDRAWAL_PREFIX,
+    EXECUTION_ADDRESS_WITHDRAWAL_PREFIX,
 )
 from ethstaker_deposit.utils.crypto import SHA256
 from ethstaker_deposit.settings import BaseChainSetting
@@ -88,12 +88,12 @@ def validate_deposit(deposit_data_dict: Dict[str, Any], credential: Credential) 
     if withdrawal_credentials[:1] == BLS_WITHDRAWAL_PREFIX == credential.withdrawal_prefix:
         if withdrawal_credentials[1:] != SHA256(credential.withdrawal_pk)[1:]:
             return False
-    elif withdrawal_credentials[:1] == ETH1_ADDRESS_WITHDRAWAL_PREFIX == credential.withdrawal_prefix:
+    elif withdrawal_credentials[:1] == EXECUTION_ADDRESS_WITHDRAWAL_PREFIX == credential.withdrawal_prefix:
         if withdrawal_credentials[1:12] != b'\x00' * 11:
             return False
-        if credential.eth1_withdrawal_address is None:
+        if credential.withdrawal_address is None:
             return False
-        if withdrawal_credentials[12:] != credential.eth1_withdrawal_address:
+        if withdrawal_credentials[12:] != credential.withdrawal_address:
             return False
     else:
         return False
@@ -144,7 +144,7 @@ def validate_int_range(num: Any, low: int, high: int) -> int:
         raise ValidationError(load_text(['err_not_positive_integer']))
 
 
-def validate_eth1_withdrawal_address(cts: click.Context, param: Any, address: str) -> HexAddress:
+def validate_withdrawal_address(cts: click.Context, param: Any, address: str) -> HexAddress:
     if address in ("", None):
         return None
     if not is_hex_address(address):
@@ -169,7 +169,7 @@ def verify_bls_to_execution_change_json(filefolder: str,
                                         credentials: Sequence[Credential],
                                         *,
                                         input_validator_indices: Sequence[int],
-                                        input_execution_address: str,
+                                        input_withdrawal_address: str,
                                         chain_setting: BaseChainSetting) -> bool:
     """
     Validate every BLSToExecutionChange found in the bls_to_execution_change JSON file folder.
@@ -186,7 +186,7 @@ def verify_bls_to_execution_change_json(filefolder: str,
             'btec_dict': btec,
             'credential': credential,
             'input_validator_index': input_validator_index,
-            'input_execution_address': input_execution_address,
+            'input_withdrawal_address': input_withdrawal_address,
             'chain_setting': chain_setting,
         } for btec, credential, input_validator_index in zip(btec_json, credentials, input_validator_indices)]
 
@@ -202,7 +202,7 @@ def validate_bls_to_execution_change(btec_dict: Dict[str, Any],
                                      credential: Credential,
                                      *,
                                      input_validator_index: int,
-                                     input_execution_address: str,
+                                     input_withdrawal_address: str,
                                      chain_setting: BaseChainSetting) -> bool:
     validator_index = int(btec_dict['message']['validator_index'])
     from_bls_pubkey = BLSPubkey(decode_hex(btec_dict['message']['from_bls_pubkey']))
@@ -215,8 +215,8 @@ def validate_bls_to_execution_change(btec_dict: Dict[str, Any],
     if from_bls_pubkey != credential.withdrawal_pk:
         return False
     if (
-        to_execution_address != credential.eth1_withdrawal_address
-        or to_execution_address != decode_hex(input_execution_address)
+        to_execution_address != credential.withdrawal_address
+        or to_execution_address != decode_hex(input_withdrawal_address)
     ):
         return False
     if genesis_validators_root != chain_setting.GENESIS_VALIDATORS_ROOT:
@@ -250,10 +250,10 @@ def normalize_bls_withdrawal_credentials_to_bytes(bls_withdrawal_credentials: st
     return bls_withdrawal_credentials_bytes
 
 
-def is_eth1_address_withdrawal_credentials(withdrawal_credentials: bytes) -> bool:
+def is_execution_address_withdrawal_credentials(withdrawal_credentials: bytes) -> bool:
     return (
         len(withdrawal_credentials) == 32
-        and withdrawal_credentials[:1] == ETH1_ADDRESS_WITHDRAWAL_PREFIX
+        and withdrawal_credentials[:1] == EXECUTION_ADDRESS_WITHDRAWAL_PREFIX
         and withdrawal_credentials[1:12] == b'\x00' * 11
     )
 
@@ -261,8 +261,8 @@ def is_eth1_address_withdrawal_credentials(withdrawal_credentials: bytes) -> boo
 def validate_bls_withdrawal_credentials(bls_withdrawal_credentials: str) -> bytes:
     bls_withdrawal_credentials_bytes = normalize_bls_withdrawal_credentials_to_bytes(bls_withdrawal_credentials)
 
-    if is_eth1_address_withdrawal_credentials(bls_withdrawal_credentials_bytes):
-        raise ValidationError(load_text(['err_is_already_eth1_form']) + '\n')
+    if is_execution_address_withdrawal_credentials(bls_withdrawal_credentials_bytes):
+        raise ValidationError(load_text(['err_is_already_01_form']) + '\n')
 
     try:
         if len(bls_withdrawal_credentials_bytes) != 32:

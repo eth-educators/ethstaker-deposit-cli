@@ -8,7 +8,7 @@ from click.testing import CliRunner
 from eth_utils import decode_hex
 
 from ethstaker_deposit.deposit import cli
-from ethstaker_deposit.utils.constants import DEFAULT_VALIDATOR_KEYS_FOLDER_NAME, ETH1_ADDRESS_WITHDRAWAL_PREFIX
+from ethstaker_deposit.utils.constants import DEFAULT_VALIDATOR_KEYS_FOLDER_NAME, EXECUTION_ADDRESS_WITHDRAWAL_PREFIX
 from .helpers import clean_key_folder, get_permissions, get_uuid
 
 
@@ -29,7 +29,7 @@ def test_existing_mnemonic_bls_withdrawal() -> None:
         '--language', 'english',
         '--ignore_connectivity',
         'existing-mnemonic',
-        '--eth1_withdrawal_address', '',
+        '--withdrawal_address', '',
         '--folder', my_folder_path,
         '--mnemonic_password', 'TREZOR',
     ]
@@ -56,7 +56,7 @@ def test_existing_mnemonic_bls_withdrawal() -> None:
     clean_key_folder(my_folder_path)
 
 
-def test_existing_mnemonic_eth1_address_withdrawal() -> None:
+def test_existing_mnemonic_withdrawal_address() -> None:
     # Prepare folder
     my_folder_path = os.path.join(os.getcwd(), 'TESTING_TEMP_FOLDER')
     clean_key_folder(my_folder_path)
@@ -64,11 +64,11 @@ def test_existing_mnemonic_eth1_address_withdrawal() -> None:
         os.mkdir(my_folder_path)
 
     runner = CliRunner()
-    eth1_withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
+    withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
     inputs = [
         'TREZOR',
         'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
-        '2', '2', '5', 'mainnet', 'MyPassword', 'MyPassword', eth1_withdrawal_address, eth1_withdrawal_address]
+        '2', '2', '5', 'mainnet', 'MyPassword', 'MyPassword', withdrawal_address, withdrawal_address]
     data = '\n'.join(inputs)
     arguments = [
         '--language', 'english',
@@ -91,7 +91,7 @@ def test_existing_mnemonic_eth1_address_withdrawal() -> None:
     for deposit in deposits_dict:
         withdrawal_credentials = bytes.fromhex(deposit['withdrawal_credentials'])
         assert withdrawal_credentials == (
-            ETH1_ADDRESS_WITHDRAWAL_PREFIX + b'\x00' * 11 + decode_hex(eth1_withdrawal_address)
+            EXECUTION_ADDRESS_WITHDRAWAL_PREFIX + b'\x00' * 11 + decode_hex(withdrawal_address)
         )
 
     all_uuid = [
@@ -109,7 +109,7 @@ def test_existing_mnemonic_eth1_address_withdrawal() -> None:
     clean_key_folder(my_folder_path)
 
 
-def test_existing_mnemonic_eth1_address_withdrawal_bad_checksum() -> None:
+def test_existing_mnemonic_withdrawal_address_bad_checksum() -> None:
     # Prepare folder
     my_folder_path = os.path.join(os.getcwd(), 'TESTING_TEMP_FOLDER')
     clean_key_folder(my_folder_path)
@@ -119,14 +119,14 @@ def test_existing_mnemonic_eth1_address_withdrawal_bad_checksum() -> None:
     runner = CliRunner()
 
     # NOTE: final 'A' needed to be an 'a'
-    wrong_eth1_withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705FA'
-    correct_eth1_withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
+    wrong_withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705FA'
+    correct_withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
 
     inputs = [
         'TREZOR',
         'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
         '2', '2', '5', 'mainnet', 'MyPassword', 'MyPassword',
-        wrong_eth1_withdrawal_address, correct_eth1_withdrawal_address, correct_eth1_withdrawal_address
+        wrong_withdrawal_address, correct_withdrawal_address, correct_withdrawal_address
     ]
     data = '\n'.join(inputs)
     arguments = [
@@ -150,7 +150,7 @@ def test_existing_mnemonic_eth1_address_withdrawal_bad_checksum() -> None:
     for deposit in deposits_dict:
         withdrawal_credentials = bytes.fromhex(deposit['withdrawal_credentials'])
         assert withdrawal_credentials == (
-            ETH1_ADDRESS_WITHDRAWAL_PREFIX + b'\x00' * 11 + decode_hex(correct_eth1_withdrawal_address)
+            EXECUTION_ADDRESS_WITHDRAWAL_PREFIX + b'\x00' * 11 + decode_hex(correct_withdrawal_address)
         )
 
     all_uuid = [
@@ -190,7 +190,7 @@ def test_pbkdf2_new_mnemonic() -> None:
     arguments = [
         '--language', 'english',
         'existing-mnemonic',
-        '--eth1_withdrawal_address', '',
+        '--withdrawal_address', '',
         '--folder', pbkdf2_folder_path,
         '--pbkdf2',
     ]
@@ -200,7 +200,7 @@ def test_pbkdf2_new_mnemonic() -> None:
     arguments = [
         '--language', 'english',
         'existing-mnemonic',
-        '--eth1_withdrawal_address', '',
+        '--withdrawal_address', '',
         '--folder', scrypt_folder_path,
     ]
     result = runner.invoke(cli, arguments, input=data)
@@ -274,7 +274,7 @@ async def test_script() -> None:
         '--validator_start_index', '1',
         '--chain', 'mainnet',
         '--keystore_password', 'MyPassword',
-        '--eth1_withdrawal_address', '""',
+        '--withdrawal_address', '""',
         '--folder', my_folder_path,
     ]
     proc = await asyncio.create_subprocess_shell(
@@ -323,7 +323,7 @@ async def test_script_abbreviated_mnemonic() -> None:
         '--validator_start_index', '1',
         '--chain', 'mainnet',
         '--keystore_password', 'MyPassword',
-        '--eth1_withdrawal_address', '""',
+        '--withdrawal_address', '""',
         '--folder', my_folder_path,
     ]
     proc = await asyncio.create_subprocess_shell(
