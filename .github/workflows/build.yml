@@ -92,19 +92,8 @@ jobs:
         if: ${{ startsWith(matrix.os, 'macos-') }}
         run: |
           brew install coreutils
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
-        id: import-gpg-key
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
-          trust_level: 5
-      - name: List GPG keys
-        run: gpg -K
-      - name: Create archive, checksum and GPG signature (Linux & macOS)
+      - name: Create archive and checksum (Linux & macOS)
         if: ${{ startsWith(matrix.os, 'ubuntu-') || startsWith(matrix.os, 'macos-') }}
-        env:
-          GPG_KEY_ID: ${{ steps.import-gpg-key.outputs.fingerprint }}
         run: |
           export ARCHIVE_FILE_NAME=${BUILD_FILE_NAME}.tar.gz
           echo "ARCHIVE_FILE_NAME=${ARCHIVE_FILE_NAME}" >> "$GITHUB_ENV"
@@ -112,11 +101,8 @@ jobs:
           mkdir -p output/artifacts
           cp ${ARCHIVE_FILE_NAME} output/artifacts
           sha256sum ${ARCHIVE_FILE_NAME} | head -c 64 > output/artifacts/${ARCHIVE_FILE_NAME}.sha256
-          gpg --default-key ${GPG_KEY_ID} --sign --armor --output output/artifacts/${ARCHIVE_FILE_NAME}.asc --detach-sig ${ARCHIVE_FILE_NAME}
-      - name: Create archive, checksum and GPG signature (Windows)
+      - name: Create archive and checksum (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
-        env:
-          GPG_KEY_ID: ${{ steps.import-gpg-key.outputs.fingerprint }}
         run: |
           $env:ZIP_FILE_NAME = ($env:BUILD_FILE_NAME + ".zip")
           echo ("ZIP_FILE_NAME=" + $env:ZIP_FILE_NAME) | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
@@ -125,8 +111,6 @@ jobs:
           copy $env:ZIP_FILE_NAME output\artifacts
           $env:CHECKSUM_FILE_NAME_PATH = ("output\artifacts\" + $env:ZIP_FILE_NAME + ".sha256")
           certUtil -hashfile $env:ZIP_FILE_NAME SHA256 | findstr /i /v "SHA256" | findstr /i /v "CertUtil" > $env:CHECKSUM_FILE_NAME_PATH
-          $env:SIGNATURE_FILE_NAME_PATH = ("output\artifacts\" + $env:ZIP_FILE_NAME + ".asc")
-          gpg --default-key $env:GPG_KEY_ID --sign --armor --output $env:SIGNATURE_FILE_NAME_PATH --detach-sig $env:ZIP_FILE_NAME
       - name: Generate artifacts attestation (Linux & macOS)
         if: ${{ startsWith(matrix.os, 'ubuntu-') || startsWith(matrix.os, 'macos-') }}
         uses: actions/attest-build-provenance@v1

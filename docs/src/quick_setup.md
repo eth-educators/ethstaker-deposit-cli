@@ -27,19 +27,18 @@ For other installation options, including building with python or virtualenv and
 
 ## Step 2: Verify the Installation
 
-1. Make sure you have GPG installed.
+1. Make sure you have [the GitHub CLI installed](https://cli.github.com/).
 
-2. Make sure you have the `edc-security@ethstaker.cc` public key by running
+2. Download [the associated attestation](https://github.com/eth-educators/ethstaker-deposit-cli/attestations) for the archive you downloaded in Step 1.
+
+3. Verify the attestation file against the corresponding file but be sure to replace the contents with the exact file name:
 ```sh
-gpg --keyserver keys.openpgp.org --search-keys 'edc-security@ethstaker.cc'
+gh attestation verify ethstaker_deposit-cli-*******-***.*** --owner eth-educators --bundle ./eth-educators-ethstaker-deposit-cli-attestation-*******.sigstore.json
 ```
 
-3. Verify the signature file against the corresponding file but be sure to replace the contents with the exact file name:
-```sh
-gpg --verify staking_deposit-cli-***.asc staking_deposit-cli-***
-```
+This step requires you to be online. If you want to perform this offline, follow [these instructions from GitHub](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/verifying-attestations-offline).
 
-4. You should see `Good signature from "EDC Security <edc-security@ethstaker.cc>"` in the output **otherwise do not continue**.
+4. You should see `✓ Verification succeeded!` in the output **otherwise do not continue**.
 
 ## Step 3: Usage
 
