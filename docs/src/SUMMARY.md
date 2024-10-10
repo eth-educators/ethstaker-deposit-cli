@@ -27,3 +27,4 @@
 
 - [Local Development](local_development.md)
 - [Release Process](release_process.md)
+- [Reporting a Vulnerability](reporting_vulnerability.md)
