@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: 'latest'
       - name: Install jsonlint
-        run: npm install -g @prantlf/jsonlint
+        run: npm install -g @prantlf/jsonlint@16.0.0
       - name: Validate JSON files
         run: |
           for file in $(find ./ethstaker_deposit/intl -name "*.json"); do
