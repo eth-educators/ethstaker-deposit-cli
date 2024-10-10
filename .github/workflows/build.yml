@@ -28,7 +28,7 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu-') || startsWith(matrix.os, 'macos-') }}
         run: |
           echo "PYTHONHASHSEED=42" >> "$GITHUB_ENV"
-          export SHORT_SHA=$(eval echo ${{ github.sha }} | cut -c -7)
+          export SHORT_SHA=$(echo ${{ github.sha }} | cut -c -7)
           echo "SHORT_SHA=${SHORT_SHA}" >> "$GITHUB_ENV"
       - name: Setup variables (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
