@@ -37,6 +37,7 @@ test = [
     "mypy",
     "pytest",
     "pytest-asyncio",
+    "coverage",
     "tomli" # pip-compile did not pick up from mypy
 ]
 
