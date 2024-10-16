@@ -1,7 +1,8 @@
 name: ci-runner
-run-name: ${{ github.actor }} is running ci-runner
+run-name: ${{ github.actor }} is testing and measuring code quality
 on:
   push:
+    branches: [main]
   pull_request:
     types: [opened, synchronize, labeled, unlabeled]
     branches: [main]
@@ -18,6 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install -r requirements.txt
           pip install -r requirements_test.txt
       - name: Run type checker
         run: python -m mypy --config-file mypy.ini -p ethstaker_deposit
@@ -31,9 +33,7 @@ jobs:
         run: npm install -g @prantlf/jsonlint@16.0.0
       - name: Validate JSON files
         run: |
-          for file in $(find ./ethstaker_deposit/intl -name "*.json"); do
-            jsonlint --no-duplicate-keys --quiet --compact $file
-          done
+          find ./ethstaker_deposit/intl -name "*.json" -exec jsonlint --no-duplicate-keys --quiet --compact {} \;
   ci-runner:
     needs: lint
     if: |
@@ -55,6 +55,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install -r requirements.txt
           pip install -r requirements_test.txt
       - name: Run tests
         run: |
@@ -84,6 +85,7 @@ jobs:
         id: merge
         run: |
           python -m pip install --upgrade pip
+          pip install -r requirements.txt
           pip install -r requirements_test.txt
           coverage combine coverage*
           coverage html
@@ -96,11 +98,13 @@ jobs:
       - name: Generate text report
         run: |
           mkdir results
-          echo "Test Coverage: [Download HTML Report](${{ steps.upload-html.outputs.artifact-url }})" >> results/coverage-text-report
-          echo >> results/coverage-text-report
-          echo \`\`\` >> results/coverage-text-report
-          coverage report >> results/coverage-text-report
-          echo \`\`\` >> results/coverage-text-report
+          {
+            echo "Test Coverage: [Download HTML Report](${{ steps.upload-html.outputs.artifact-url }})" ;
+            echo ;
+            echo \`\`\` ;
+            coverage report ;
+            echo \`\`\` ;
+          } >> results/coverage-text-report
           echo ${{ github.event.number }} > results/issue_number
       - name: Upload final coverage text report
         uses: actions/upload-artifact@v4
