@@ -5,7 +5,7 @@ from dataclasses import (
     field as dataclass_field
 )
 import json
-import os
+
 from py_ecc.bls import G2ProofOfPossession as bls
 from secrets import randbits
 from typing import Any, Dict, Union
@@ -20,6 +20,9 @@ from ethstaker_deposit.utils.crypto import (
 )
 from ethstaker_deposit.utils.constants import (
     UNICODE_CONTROL_CHARS,
+)
+from ethstaker_deposit.utils.file_handling import (
+    sensitive_opener,
 )
 
 hexdigits = set('0123456789abcdef')
@@ -96,10 +99,8 @@ class Keystore(BytesDataclass):
         """
         Save self as a JSON keystore.
         """
-        with open(filefolder, 'w') as f:
+        with open(filefolder, 'w', opener=sensitive_opener) as f:
             f.write(self.as_json())
-        if os.name == 'posix':
-            os.chmod(filefolder, int('440', 8))  # Read for owner & group
 
     @classmethod
     def from_json(cls, json_dict: Dict[Any, Any]) -> 'Keystore':

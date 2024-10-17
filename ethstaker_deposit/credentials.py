@@ -38,6 +38,9 @@ from ethstaker_deposit.utils.ssz import (
     DepositMessage,
     SignedBLSToExecutionChange,
 )
+from ethstaker_deposit.utils.file_handling import (
+    sensitive_opener,
+)
 
 
 class WithdrawalType(Enum):
@@ -364,8 +367,6 @@ class CredentialList:
                     bar.update(1)
 
         filefolder = os.path.join(folder, 'bls_to_execution_change-%i.json' % time.time())
-        with open(filefolder, 'w') as f:
+        with open(filefolder, 'w', opener=sensitive_opener) as f:
             json.dump(bls_to_execution_changes, f)
-        if os.name == 'posix':
-            os.chmod(filefolder, int('440', 8))  # Read for owner & group
         return filefolder

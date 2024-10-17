@@ -51,7 +51,7 @@ def test_existing_mnemonic_bls_withdrawal() -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
     # Clean up
     clean_key_folder(my_folder_path)
 
@@ -104,7 +104,7 @@ def test_existing_mnemonic_withdrawal_address() -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
     # Clean up
     clean_key_folder(my_folder_path)
 
@@ -163,7 +163,7 @@ def test_existing_mnemonic_withdrawal_address_bad_checksum() -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
     # Clean up
     clean_key_folder(my_folder_path)
 
@@ -289,7 +289,7 @@ async def test_script() -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
 
     # Clean up
     clean_key_folder(my_folder_path)
@@ -338,7 +338,7 @@ async def test_script_abbreviated_mnemonic() -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
 
     # Clean up
     clean_key_folder(my_folder_path)
@@ -393,7 +393,7 @@ def test_existing_mnemonic_custom_testnet() -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
     # Clean up
     clean_key_folder(my_folder_path)
 
@@ -438,7 +438,7 @@ def test_existing_mnemonic_multiple_languages() -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
     # Clean up
     clean_key_folder(my_folder_path)
 
@@ -484,6 +484,6 @@ def test_existing_mnemonic_multiple_languages_argument() -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
     # Clean up
     clean_key_folder(my_folder_path)

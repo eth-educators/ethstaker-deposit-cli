@@ -56,7 +56,7 @@ def test_regeneration(monkeypatch) -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in part_1_key_files:
-            assert get_permissions(validator_keys_folder_path_1, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path_1, file_name) == '0o400'
 
     # Part 2: existing-mnemonic
     runner = CliRunner()
@@ -98,7 +98,7 @@ def test_regeneration(monkeypatch) -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in part_2_key_files:
-            assert get_permissions(validator_keys_folder_path_2, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path_2, file_name) == '0o400'
 
     # Clean up
     clean_key_folder(folder_path_1)

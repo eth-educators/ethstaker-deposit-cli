@@ -10,6 +10,9 @@ from ethstaker_deposit.utils.ssz import (
     compute_signing_root,
     compute_voluntary_exit_domain,
 )
+from ethstaker_deposit.utils.file_handling import (
+    sensitive_opener,
+)
 
 
 def exit_transaction_generation(
@@ -55,8 +58,6 @@ def export_exit_transaction_json(folder: str, signed_exit: SignedVoluntaryExit, 
         )
     )
 
-    with open(filefolder, 'w') as f:
+    with open(filefolder, 'w', opener=sensitive_opener) as f:
         json.dump(signed_exit_json, f)
-    if os.name == 'posix':
-        os.chmod(filefolder, int('440', 8))  # Read for owner & group
     return filefolder

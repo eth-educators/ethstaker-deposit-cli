@@ -13,6 +13,9 @@ from ethstaker_deposit.utils.ssz import (
     compute_signing_root,
     compute_bls_to_execution_change_keystore_domain,
 )
+from ethstaker_deposit.utils.file_handling import (
+    sensitive_opener,
+)
 
 
 def bls_to_execution_change_keystore_generation(
@@ -64,8 +67,6 @@ def export_bls_to_execution_change_keystore_json(folder: str,
         'bls_to_execution_change_keystore_signature-%s-%i.json' % (index, timestamp)
     )
 
-    with open(filefolder, 'w') as f:
+    with open(filefolder, 'w', opener=sensitive_opener) as f:
         json.dump(signed_bls_to_execution_change_keystore_json, f)
-    if os.name == 'posix':
-        os.chmod(filefolder, int('440', 8))  # Read for owner & group
     return filefolder

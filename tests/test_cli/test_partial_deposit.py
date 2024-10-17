@@ -68,7 +68,7 @@ def test_partial_deposit(amount: str) -> None:
     assert len(deposit_files) == 1
 
     if os.name == 'posix':
-        assert get_permissions(partial_deposit_folder, deposit_files[0]) == '0o440'
+        assert get_permissions(partial_deposit_folder, deposit_files[0]) == '0o400'
 
     clean_partial_deposit_folder(my_folder_path)
 
@@ -137,7 +137,7 @@ def test_partial_deposit_matches_existing_mnemonic_deposit() -> None:
     assert deposit_contents == partial_deposit_contents
 
     if os.name == 'posix':
-        assert get_permissions(partial_deposit_folder, partial_deposit_files[0]) == '0o440'
+        assert get_permissions(partial_deposit_folder, partial_deposit_files[0]) == '0o400'
 
     clean_folder(my_folder_path, validator_key_folder, True)
     clean_partial_deposit_folder(my_folder_path)
@@ -218,7 +218,7 @@ def test_partial_deposit_does_not_match_if_amount_differs() -> None:
     assert deposit_contents_dict["deposit_cli_version"] == partial_deposit_contents_dict["deposit_cli_version"]
 
     if os.name == 'posix':
-        assert get_permissions(partial_deposit_folder, partial_deposit_files[0]) == '0o440'
+        assert get_permissions(partial_deposit_folder, partial_deposit_files[0]) == '0o400'
 
     clean_folder(my_folder_path, validator_key_folder, True)
     clean_partial_deposit_folder(my_folder_path)
@@ -281,7 +281,7 @@ def test_partial_deposit_custom_network(amount: str) -> None:
     assert len(deposit_files) == 1
 
     if os.name == 'posix':
-        assert get_permissions(partial_deposit_folder, deposit_files[0]) == '0o440'
+        assert get_permissions(partial_deposit_folder, deposit_files[0]) == '0o400'
 
     clean_partial_deposit_folder(my_folder_path)
 

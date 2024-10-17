@@ -60,7 +60,7 @@ def get_permissions(path: str, file_name: str) -> str:
 def verify_file_permission(os_ref, folder_path, files):
     if os_ref.name == 'posix':
         for file_name in files:
-            assert get_permissions(folder_path, file_name) == '0o440'
+            assert get_permissions(folder_path, file_name) == '0o400'
 
 
 def prepare_testing_folder(os_ref, testing_folder_name='TESTING_TEMP_FOLDER'):
