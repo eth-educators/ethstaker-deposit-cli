@@ -69,7 +69,7 @@ def test_new_mnemonic_bls_withdrawal(monkeypatch) -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
 
     # Clean up
     clean_key_folder(my_folder_path)
@@ -125,7 +125,7 @@ def test_new_mnemonic_withdrawal_address(monkeypatch) -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
 
     # Clean up
     clean_key_folder(my_folder_path)
@@ -186,7 +186,7 @@ def test_new_mnemonic_withdrawal_address_bad_checksum(monkeypatch) -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
 
     # Clean up
     clean_key_folder(my_folder_path)
@@ -243,7 +243,7 @@ def test_new_mnemonic_withdrawal_address_parameter(monkeypatch) -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
 
     # Clean up
     clean_key_folder(my_folder_path)
@@ -301,7 +301,7 @@ def test_new_mnemonic_eth1_withdrawal_address_param(monkeypatch) -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
 
     # Clean up
     clean_key_folder(my_folder_path)
@@ -359,7 +359,7 @@ def test_new_mnemonic_execution_address_param(monkeypatch) -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
 
     # Clean up
     clean_key_folder(my_folder_path)
@@ -530,7 +530,7 @@ async def test_script_bls_withdrawal() -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
 
     # Clean up
     clean_key_folder(my_folder_path)
@@ -609,7 +609,7 @@ async def test_script_abbreviated_mnemonic() -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
 
     # Clean up
     clean_key_folder(my_folder_path)
@@ -665,7 +665,7 @@ def test_new_mnemonic_custom_testnet(monkeypatch) -> None:
     # Verify file permissions
     if os.name == 'posix':
         for file_name in key_files:
-            assert get_permissions(validator_keys_folder_path, file_name) == '0o440'
+            assert get_permissions(validator_keys_folder_path, file_name) == '0o400'
 
     # Clean up
     clean_key_folder(my_folder_path)

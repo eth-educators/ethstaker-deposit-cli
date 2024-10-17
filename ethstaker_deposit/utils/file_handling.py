@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import Any, Union
 
 
 def resource_path(relative_path: str) -> str:
@@ -13,3 +14,14 @@ def resource_path(relative_path: str) -> str:
     except Exception:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
+
+
+def sensitive_opener(path: Union[str, bytes, 'os.PathLike[Any]'], flags: int) -> int:
+    """
+    Opener to be used with the open built-in function to correctly assign permissions to sensitive
+    files when created and written to for the first time.
+    """
+    if os.name == 'posix':
+        return os.open(path, flags | os.O_EXCL, 0o400)
+    else:
+        return os.open(path, flags)
