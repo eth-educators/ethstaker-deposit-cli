@@ -23,7 +23,7 @@ def test_existing_mnemonic_bls_withdrawal() -> None:
     inputs = [
         'TREZOR',
         'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
-        '2', '2', '5', 'mainnet', 'MyPasswordIs', 'MyPasswordIs']
+        '2', '2', '5', 'mainnet', 'MyPasswordIs', 'MyPasswordIs', '']
     data = '\n'.join(inputs)
     arguments = [
         '--language', 'english',
@@ -68,7 +68,7 @@ def test_existing_mnemonic_withdrawal_address() -> None:
     inputs = [
         'TREZOR',
         'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
-        '2', '2', '5', 'mainnet', 'MyPasswordIs', 'MyPasswordIs', withdrawal_address, withdrawal_address]
+        '2', '2', '5', 'mainnet', 'MyPasswordIs', 'MyPasswordIs', withdrawal_address, withdrawal_address, '']
     data = '\n'.join(inputs)
     arguments = [
         '--language', 'english',
@@ -126,7 +126,7 @@ def test_existing_mnemonic_withdrawal_address_bad_checksum() -> None:
         'TREZOR',
         'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
         '2', '2', '5', 'mainnet', 'MyPasswordIs', 'MyPasswordIs',
-        wrong_withdrawal_address, correct_withdrawal_address, correct_withdrawal_address
+        wrong_withdrawal_address, correct_withdrawal_address, correct_withdrawal_address, ''
     ]
     data = '\n'.join(inputs)
     arguments = [
@@ -184,7 +184,7 @@ def test_pbkdf2_new_mnemonic() -> None:
     runner = CliRunner()
     inputs = [
         'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
-        '0', '0', '1', 'mainnet', 'MyPasswordIs', 'MyPasswordIs',
+        '0', '0', '1', 'mainnet', 'MyPasswordIs', 'MyPasswordIs', '',
     ]
     data = '\n'.join(inputs)
     arguments = [
@@ -364,7 +364,7 @@ def test_existing_mnemonic_custom_testnet() -> None:
     inputs = [
         'TREZOR',
         'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
-        '2', '2', '5', 'MyPasswordIs', 'MyPasswordIs']
+        '2', '2', '5', 'MyPasswordIs', 'MyPasswordIs', '']
     data = '\n'.join(inputs)
     arguments = [
         '--language', 'english',
@@ -409,7 +409,7 @@ def test_existing_mnemonic_multiple_languages() -> None:
     inputs = [
         'TREZOR',
         '的 的 的 的 的 的 的 的 的 的 的 在', '1',
-        '2', '2', '5', 'MyPasswordIs', 'MyPasswordIs']
+        '2', '2', '5', 'MyPasswordIs', 'MyPasswordIs', '']
     data = '\n'.join(inputs)
     arguments = [
         '--language', 'english',
@@ -454,7 +454,7 @@ def test_existing_mnemonic_multiple_languages_argument() -> None:
     inputs = [
         'TREZOR',
         '的 的 的 的 的 的 的 的 的 的 的 在',
-        '2', '2', '5', 'MyPasswordIs', 'MyPasswordIs']
+        '2', '2', '5', 'MyPasswordIs', 'MyPasswordIs', '']
     data = '\n'.join(inputs)
     arguments = [
         '--language', 'english',

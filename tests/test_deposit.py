@@ -98,7 +98,7 @@ def test_should_check_connectivity_by_default(monkeypatch) -> None:
     runner = CliRunner()
     inputs = [
         'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
-        '0', '0', '1', 'mainnet', 'MyPasswordIs', 'MyPasswordIs']
+        '0', '0', '1', 'mainnet', 'MyPasswordIs', 'MyPasswordIs', '']
     data = '\n'.join(inputs)
     arguments = [
         '--language', 'english',
@@ -131,7 +131,7 @@ def test_should_not_check_connectivity_with_ignore_connectivity(monkeypatch) -> 
     runner = CliRunner()
     inputs = [
         'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
-        '0', '0', '1', 'mainnet', 'MyPasswordIs', 'MyPasswordIs']
+        '0', '0', '1', 'mainnet', 'MyPasswordIs', 'MyPasswordIs', '']
     data = '\n'.join(inputs)
     arguments = [
         '--language', 'english',

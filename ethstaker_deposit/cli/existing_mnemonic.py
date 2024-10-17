@@ -10,6 +10,7 @@ from ethstaker_deposit.exceptions import MultiLanguageError, ValidationError
 from ethstaker_deposit.key_handling.key_derivation.mnemonic import (
     reconstruct_mnemonic,
 )
+from ethstaker_deposit.utils import config
 from ethstaker_deposit.utils.constants import (
     MNEMONIC_LANG_OPTIONS,
     WORD_LISTS_PATH,
@@ -118,6 +119,8 @@ def existing_mnemonic(ctx: click.Context, mnemonic: str, mnemonic_password: str,
     ctx.obj.update({'mnemonic': mnemonic, 'mnemonic_password': mnemonic_password})
     # Clear clipboard
     try:  # Failing this on headless Linux is expected
+        if not config.non_interactive:
+            click.pause(load_text(['msg_confirm_clipboard_clearing']))
         pyperclip.copy(' ')
     except Exception:
         pass

@@ -53,15 +53,26 @@ def new_mnemonic(ctx: click.Context, mnemonic_language: str, **kwargs: Any) -> N
     test_mnemonic = ''
     while mnemonic != reconstruct_mnemonic(test_mnemonic, WORD_LISTS_PATH, mnemonic_language):
         clear_terminal()
-        click.echo(load_text(['msg_mnemonic_presentation']))
+        click.echo(
+            load_text(['msg_mnemonic_presentation'])
+            + '\n\n********************\n'
+            + load_text(['msg_mnemonic_clipboard_warning'])
+            + '\n********************'
+        )
         click.echo('\n\n%s\n\n' % mnemonic)
         click.pause(load_text(['msg_press_any_key']))
 
         clear_terminal()
-        test_mnemonic = click.prompt(load_text(['msg_mnemonic_retype_prompt']) + '\n\n')
+        test_mnemonic = click.prompt(
+            load_text(['msg_mnemonic_retype_prompt'])
+            + '\n\n********************\n'
+            + load_text(['msg_mnemonic_clipboard_warning'])
+            + '\n********************\n\n'
+        )
     clear_terminal()
     # Clear clipboard
     try:  # Failing this on headless Linux is expected
+        click.pause(load_text(['msg_confirm_clipboard_clearing']))
         pyperclip.copy(' ')
     except Exception:
         pass

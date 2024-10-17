@@ -44,7 +44,7 @@ def test_new_mnemonic_bls_withdrawal(monkeypatch) -> None:
 
     runner = CliRunner()
     inputs = ['english', 'english', '1', 'mainnet', 'MyPasswordIs', 'MyPasswordIs',
-              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about']
+              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about', '']
     data = '\n'.join(inputs)
     arguments = [
         '--ignore_connectivity',
@@ -91,7 +91,7 @@ def test_new_mnemonic_withdrawal_address(monkeypatch) -> None:
     runner = CliRunner()
     withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
     inputs = ['english', '1', 'mainnet', 'MyPasswordIs', 'MyPasswordIs', withdrawal_address, withdrawal_address,
-              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about']
+              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about', '']
     data = '\n'.join(inputs)
     arguments = [
         '--language', 'english',
@@ -152,7 +152,7 @@ def test_new_mnemonic_withdrawal_address_bad_checksum(monkeypatch) -> None:
 
     inputs = ['english', '1', 'mainnet', 'MyPasswordIs', 'MyPasswordIs',
               wrong_withdrawal_address, correct_withdrawal_address, correct_withdrawal_address,
-              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about']
+              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about', '']
     data = '\n'.join(inputs)
     arguments = [
         '--language', 'english',
@@ -208,7 +208,7 @@ def test_new_mnemonic_withdrawal_address_parameter(monkeypatch) -> None:
     runner = CliRunner()
     withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
     inputs = [withdrawal_address, 'english', '1', 'mainnet', 'MyPasswordIs', 'MyPasswordIs',
-              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about']
+              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about', '']
     data = '\n'.join(inputs)
     arguments = [
         '--language', 'english',
@@ -266,7 +266,7 @@ def test_new_mnemonic_eth1_withdrawal_address_param(monkeypatch) -> None:
     runner = CliRunner()
     withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
     inputs = [withdrawal_address, 'english', '1', 'mainnet', 'MyPasswordIs', 'MyPasswordIs',
-              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about']
+              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about', '']
     data = '\n'.join(inputs)
     arguments = [
         '--language', 'english',
@@ -324,7 +324,7 @@ def test_new_mnemonic_execution_address_param(monkeypatch) -> None:
     runner = CliRunner()
     withdrawal_address = '0x00000000219ab540356cBB839Cbe05303d7705Fa'
     inputs = [withdrawal_address, 'english', '1', 'mainnet', 'MyPasswordIs', 'MyPasswordIs',
-              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about']
+              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about', '']
     data = '\n'.join(inputs)
     arguments = [
         '--language', 'english',
@@ -387,7 +387,7 @@ def test_pbkdf2_new_mnemonic(monkeypatch) -> None:
     runner = CliRunner()
 
     inputs = ['english', '1', 'mainnet', 'MyPasswordIs', 'MyPasswordIs',
-              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about']
+              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about', '']
     data = '\n'.join(inputs)
     arguments = [
         '--language', 'english',
@@ -448,7 +448,8 @@ def test_pbkdf2_new_mnemonic(monkeypatch) -> None:
     clean_key_folder(scrypt_folder_path)
 
 
-@pytest.mark.skipif(sys.version_info[:2] == (3, 9) and sys.platform == "darwin", reason="breaks on macOS Python 3.9")
+@pytest.mark.skipif(sys.version_info[:2] == (3, 9), reason=(
+    "asyncio subprocess is broken in different ways on 3.9 with https://github.com/python/cpython/issues/88050"))
 @pytest.mark.asyncio
 async def test_script_bls_withdrawal() -> None:
     # Prepare folder
@@ -487,20 +488,28 @@ async def test_script_bls_withdrawal() -> None:
     )
 
     seed_phrase = ''
+    encoded_phrase = b''
     parsing = False
     mnemonic_json_file = os.path.join(os.getcwd(), 'ethstaker_deposit/../ethstaker_deposit/cli/', 'new_mnemonic.json')
+    msg_mnemonic_clipboard_warning = load_text(['msg_mnemonic_clipboard_warning'], mnemonic_json_file, 'new_mnemonic')
     async for out in proc.stdout:
         output = out.decode('utf-8').rstrip()
         if output.startswith(load_text(['msg_mnemonic_presentation'], mnemonic_json_file, 'new_mnemonic')):
             parsing = True
         elif output.startswith(load_text(['msg_mnemonic_retype_prompt'], mnemonic_json_file, 'new_mnemonic')):
-            parsing = False
+            proc.stdin.write(encoded_phrase)
+            proc.stdin.write(b'\n')
+        elif output.startswith(load_text(['msg_confirm_clipboard_clearing'], mnemonic_json_file, 'new_mnemonic')):
+            proc.stdin.write(b'\n')
         elif parsing:
-            seed_phrase += output
-            if len(seed_phrase) > 0:
-                encoded_phrase = seed_phrase.encode()
-                proc.stdin.write(encoded_phrase)
-                proc.stdin.write(b'\n')
+            if (
+                not output.startswith('********************')
+                and not output.startswith(msg_mnemonic_clipboard_warning)
+            ):
+                seed_phrase += output
+                if len(seed_phrase) > 0:
+                    encoded_phrase = seed_phrase.encode()
+                    parsing = False
 
     assert len(seed_phrase) > 0
 
@@ -536,7 +545,8 @@ async def test_script_bls_withdrawal() -> None:
     clean_key_folder(my_folder_path)
 
 
-@pytest.mark.skipif(sys.version_info[:2] == (3, 9) and sys.platform == "darwin", reason="breaks on macOS Python 3.9")
+@pytest.mark.skipif(sys.version_info[:2] == (3, 9), reason=(
+    "asyncio subprocess is broken in different ways on 3.9 with https://github.com/python/cpython/issues/88050"))
 @pytest.mark.asyncio
 async def test_script_abbreviated_mnemonic() -> None:
     # Prepare folder
@@ -575,21 +585,29 @@ async def test_script_abbreviated_mnemonic() -> None:
     )
 
     seed_phrase = ''
+    encoded_phrase = b''
     parsing = False
     mnemonic_json_file = os.path.join(os.getcwd(), 'ethstaker_deposit/../ethstaker_deposit/cli/', 'new_mnemonic.json')
+    msg_mnemonic_clipboard_warning = load_text(['msg_mnemonic_clipboard_warning'], mnemonic_json_file, 'new_mnemonic')
     async for out in proc.stdout:
         output = out.decode('utf-8').rstrip()
         if output.startswith(load_text(['msg_mnemonic_presentation'], mnemonic_json_file, 'new_mnemonic')):
             parsing = True
         elif output.startswith(load_text(['msg_mnemonic_retype_prompt'], mnemonic_json_file, 'new_mnemonic')):
-            parsing = False
+            proc.stdin.write(encoded_phrase)
+            proc.stdin.write(b'\n')
+        elif output.startswith(load_text(['msg_confirm_clipboard_clearing'], mnemonic_json_file, 'new_mnemonic')):
+            proc.stdin.write(b'\n')
         elif parsing:
-            seed_phrase += output
-            if len(seed_phrase) > 0:
-                abbreviated_mnemonic = ' '.join(abbreviate_words(seed_phrase.split(' ')))
-                encoded_phrase = abbreviated_mnemonic.encode()
-                proc.stdin.write(encoded_phrase)
-                proc.stdin.write(b'\n')
+            if (
+                not output.startswith('********************')
+                and not output.startswith(msg_mnemonic_clipboard_warning)
+            ):
+                seed_phrase += output
+                if len(seed_phrase) > 0:
+                    abbreviated_mnemonic = ' '.join(abbreviate_words(seed_phrase.split(' ')))
+                    encoded_phrase = abbreviated_mnemonic.encode()
+                    parsing = False
 
     assert len(seed_phrase) > 0
 
@@ -639,7 +657,7 @@ def test_new_mnemonic_custom_testnet(monkeypatch) -> None:
 
     runner = CliRunner()
     inputs = ['english', 'english', '1', 'MyPasswordIs', 'MyPasswordIs',
-              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about']
+              'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about', '']
     data = '\n'.join(inputs)
     arguments = [
         '--ignore_connectivity',
