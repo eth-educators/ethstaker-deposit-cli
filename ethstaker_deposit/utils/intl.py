@@ -59,7 +59,11 @@ def load_text(params: list[str], file_path: str = '', func: str = '', lang: str 
 
     # Determine path to json text
     file_path_list = os.path.normpath(file_path).split(os.path.sep)
-    rel_path_list = file_path_list[file_path_list.index('ethstaker_deposit') + 1:]
+
+    # Find the relative path to the internationalization file from the project directory
+    last_occurrence = len(file_path_list) - file_path_list[::-1].index('ethstaker_deposit')
+    rel_path_list = file_path_list[last_occurrence:]
+
     json_path = resource_path(os.path.join(INTL_CONTENT_PATH, lang, *rel_path_list))
 
     try:
