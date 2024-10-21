@@ -99,7 +99,7 @@ class Keystore(BytesDataclass):
         """
         Save self as a JSON keystore.
         """
-        with open(filefolder, 'w', opener=sensitive_opener) as f:
+        with open(filefolder, 'w', encoding='utf-8', opener=sensitive_opener) as f:
             f.write(self.as_json())
 
     @classmethod

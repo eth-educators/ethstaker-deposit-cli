@@ -367,6 +367,6 @@ class CredentialList:
                     bar.update(1)
 
         filefolder = os.path.join(folder, 'bls_to_execution_change-%i.json' % time.time())
-        with open(filefolder, 'w', opener=sensitive_opener) as f:
+        with open(filefolder, 'w', encoding='utf-8', opener=sensitive_opener) as f:
             json.dump(bls_to_execution_changes, f)
         return filefolder

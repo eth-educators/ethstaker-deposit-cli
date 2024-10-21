@@ -67,6 +67,6 @@ def export_bls_to_execution_change_keystore_json(folder: str,
         'bls_to_execution_change_keystore_signature-%s-%i.json' % (index, timestamp)
     )
 
-    with open(filefolder, 'w', opener=sensitive_opener) as f:
+    with open(filefolder, 'w', encoding='utf-8', opener=sensitive_opener) as f:
         json.dump(signed_bls_to_execution_change_keystore_json, f)
     return filefolder

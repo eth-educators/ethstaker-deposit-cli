@@ -58,6 +58,6 @@ def export_exit_transaction_json(folder: str, signed_exit: SignedVoluntaryExit, 
         )
     )
 
-    with open(filefolder, 'w', opener=sensitive_opener) as f:
+    with open(filefolder, 'w', encoding='utf-8', opener=sensitive_opener) as f:
         json.dump(signed_exit_json, f)
     return filefolder

@@ -128,10 +128,10 @@ def test_partial_deposit_matches_existing_mnemonic_deposit() -> None:
 
     assert len(partial_deposit_files) == 1
 
-    with open(os.path.join(validator_key_folder, deposit_files[0]), 'r') as file1:
+    with open(os.path.join(validator_key_folder, deposit_files[0]), 'r', encoding='utf-8') as file1:
         deposit_contents = file1.read()
 
-    with open(os.path.join(partial_deposit_folder, partial_deposit_files[0]), 'r') as file2:
+    with open(os.path.join(partial_deposit_folder, partial_deposit_files[0]), 'r', encoding='utf-8') as file2:
         partial_deposit_contents = file2.read()
 
     assert deposit_contents == partial_deposit_contents
@@ -198,10 +198,10 @@ def test_partial_deposit_does_not_match_if_amount_differs() -> None:
 
     assert len(partial_deposit_files) == 1
 
-    with open(os.path.join(validator_key_folder, deposit_files[0]), 'r') as file1:
+    with open(os.path.join(validator_key_folder, deposit_files[0]), 'r', encoding='utf-8') as file1:
         deposit_contents = file1.read()
 
-    with open(os.path.join(partial_deposit_folder, partial_deposit_files[0]), 'r') as file2:
+    with open(os.path.join(partial_deposit_folder, partial_deposit_files[0]), 'r', encoding='utf-8') as file2:
         partial_deposit_contents = file2.read()
 
     assert deposit_contents != partial_deposit_contents
