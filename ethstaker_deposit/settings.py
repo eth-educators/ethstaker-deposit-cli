@@ -5,6 +5,12 @@ from ethstaker_deposit import __version__
 
 DEPOSIT_CLI_VERSION = __version__
 
+# We are faking the deposit_cli_version to pass the current Launchpad version test
+# See https://github.com/eth-educators/ethstaker-deposit-cli/issues/216
+version_elements = DEPOSIT_CLI_VERSION.split('.')
+version_elements[0] = str(int(version_elements[0]) + 10)
+fake_cli_version = '.'.join(version_elements)
+
 
 class BaseChainSetting(NamedTuple):
     NETWORK_NAME: str

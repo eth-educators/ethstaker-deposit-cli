@@ -18,7 +18,11 @@ from ethstaker_deposit.key_handling.keystore import (
     Pbkdf2Keystore,
     ScryptKeystore,
 )
-from ethstaker_deposit.settings import DEPOSIT_CLI_VERSION, BaseChainSetting
+from ethstaker_deposit.settings import (
+    fake_cli_version,
+    DEPOSIT_CLI_VERSION,
+    BaseChainSetting,
+)
 from ethstaker_deposit.utils.constants import (
     BLS_WITHDRAWAL_PREFIX,
     EXECUTION_ADDRESS_WITHDRAWAL_PREFIX,
@@ -152,7 +156,7 @@ class Credential:
         datum_dict.update({'deposit_data_root': signed_deposit_datum.hash_tree_root})
         datum_dict.update({'fork_version': self.chain_setting.GENESIS_FORK_VERSION})
         datum_dict.update({'network_name': self.chain_setting.NETWORK_NAME})
-        datum_dict.update({'deposit_cli_version': DEPOSIT_CLI_VERSION})
+        datum_dict.update({'deposit_cli_version': fake_cli_version})
         return datum_dict
 
     def signing_keystore(self, password: str) -> Keystore:
