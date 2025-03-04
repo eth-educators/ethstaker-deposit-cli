@@ -133,12 +133,11 @@ def generate_keys_arguments_decorator(function: Callable[..., Any]) -> Callable[
         ),
         jit_option(
             callback=captive_prompt_callback(
-                lambda amount: validate_deposit_amount(amount),
-                lambda: load_text(['arg_amount', 'prompt'], func='generate_keys_arguments_decorator'),
-                default=str(min_activation_amount_eth),
+                lambda amount, **kwargs: validate_deposit_amount(amount, **kwargs),
+                get_amount_prompt_from_template,
                 prompt_if=prompt_if_other_value('compounding', True),
+                prompt_marker="amount",
             ),
-            default=str(min_activation_amount_eth),
             help=lambda: load_text(['arg_amount', 'help'], func='generate_keys_arguments_decorator'),
             param_decls='--amount',
             prompt=False,  # the callback handles the prompt
@@ -162,6 +161,17 @@ def generate_keys_arguments_decorator(function: Callable[..., Any]) -> Callable[
         function = decorator(function)
     return function
 
+def get_amount_prompt_from_template() -> str:
+    ctx = click.get_current_context(silent=True)
+    chain = ctx.params.get('chain', 'mainnet') if ctx is not None else 'mainnet'
+    chain_setting = get_chain_setting(chain)
+    min_deposit = chain_setting.MINIMUM_COMPOUNDING_DEPOSIT if ctx.params.get('compounding', False) else 1
+    multiplier = chain_setting.MULPLIER if ctx.params.get('compounding', False) else 1
+    activation_amount = str(int(32/multiplier))
+    template = load_text(['arg_amount', 'prompt'], func='generate_keys_arguments_decorator')
+    return template.format(min_deposit=min_deposit, activation_amount=activation_amount)
+
+
 
 @click.command()
 @click.pass_context
@@ -178,6 +188,8 @@ def generate_keys(ctx: click.Context, validator_start_index: int,
 
     # Get chain setting
     chain_setting = devnet_chain_setting if devnet_chain_setting is not None else get_chain_setting(chain)
+
+    amounts = [amount * chain_setting.MULPLIER for amount in amounts]
 
     if not os.path.exists(folder):
         os.mkdir(folder)
