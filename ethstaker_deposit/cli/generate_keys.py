@@ -61,7 +61,7 @@ def generate_keys_arguments_decorator(function: Callable[..., Any]) -> Callable[
     decorators = [
         jit_option(
             callback=captive_prompt_callback(
-                lambda num: validate_int_range(num, 1, 2**32),
+                lambda num, _: validate_int_range(num, 1, 2**32),
                 lambda: load_text(['num_validators', 'prompt'], func='generate_keys_arguments_decorator')
             ),
             help=lambda: load_text(['num_validators', 'help'], func='generate_keys_arguments_decorator'),
@@ -76,7 +76,7 @@ def generate_keys_arguments_decorator(function: Callable[..., Any]) -> Callable[
         ),
         jit_option(
             callback=captive_prompt_callback(
-                lambda x: closest_match(x, ALL_CHAIN_KEYS),
+                lambda x, _: closest_match(x, ALL_CHAIN_KEYS),
                 choice_prompt_func(
                     lambda: load_text(['chain', 'prompt'], func='generate_keys_arguments_decorator'),
                     ALL_CHAIN_KEYS
@@ -91,7 +91,7 @@ def generate_keys_arguments_decorator(function: Callable[..., Any]) -> Callable[
         ),
         jit_option(
             callback=captive_prompt_callback(
-                validate_password_strength,
+                lambda password, _: validate_password_strength(password),
                 lambda: load_text(['keystore_password', 'prompt'], func='generate_keys_arguments_decorator'),
                 lambda: load_text(['keystore_password', 'confirm'], func='generate_keys_arguments_decorator'),
                 lambda: load_text(['keystore_password', 'mismatch'], func='generate_keys_arguments_decorator'),
@@ -105,7 +105,7 @@ def generate_keys_arguments_decorator(function: Callable[..., Any]) -> Callable[
         ),
         jit_option(
             callback=captive_prompt_callback(
-                lambda address: validate_withdrawal_address(None, None, address),
+                lambda address, _: validate_withdrawal_address(None, None, address),
                 lambda: load_text(['arg_withdrawal_address', 'prompt'], func='generate_keys_arguments_decorator'),
                 lambda: load_text(['arg_withdrawal_address', 'confirm'], func='generate_keys_arguments_decorator'),
                 lambda: load_text(['arg_withdrawal_address', 'mismatch'], func='generate_keys_arguments_decorator'),
@@ -119,7 +119,7 @@ def generate_keys_arguments_decorator(function: Callable[..., Any]) -> Callable[
         ),
         jit_option(
             callback=captive_prompt_callback(
-                lambda value: validate_yesno(None, None, value),
+                lambda value, _: validate_yesno(None, None, value),
                 lambda: load_text(['arg_compounding', 'prompt'], func='generate_keys_arguments_decorator'),
                 default="False",
                 prompt_if=prompt_if_other_exists('withdrawal_address'),
@@ -133,12 +133,11 @@ def generate_keys_arguments_decorator(function: Callable[..., Any]) -> Callable[
         ),
         jit_option(
             callback=captive_prompt_callback(
-                lambda amount: validate_deposit_amount(amount),
-                lambda: load_text(['arg_amount', 'prompt'], func='generate_keys_arguments_decorator'),
-                default=str(min_activation_amount_eth),
+                lambda amount, **kwargs: validate_deposit_amount(amount, **kwargs),
+                get_amount_prompt_from_template,
                 prompt_if=prompt_if_other_value('compounding', True),
+                prompt_marker="amount",
             ),
-            default=str(min_activation_amount_eth),
             help=lambda: load_text(['arg_amount', 'help'], func='generate_keys_arguments_decorator'),
             param_decls='--amount',
             prompt=False,  # the callback handles the prompt
@@ -162,6 +161,17 @@ def generate_keys_arguments_decorator(function: Callable[..., Any]) -> Callable[
         function = decorator(function)
     return function
 
+def get_amount_prompt_from_template() -> str:
+    ctx = click.get_current_context(silent=True)
+    chain = ctx.params.get('chain', 'mainnet') if ctx is not None else 'mainnet'
+    chain_setting = get_chain_setting(chain)
+    min_deposit = chain_setting.MINIMUM_COMPOUNDING_DEPOSIT if ctx.params.get('compounding', False) else 1
+    multiplier = chain_setting.MULTIPLIER if ctx.params.get('compounding', False) else 1
+    activation_amount = str(int(32/multiplier))
+    template = load_text(['arg_amount', 'prompt'], func='generate_keys_arguments_decorator')
+    return template.format(min_deposit=min_deposit, activation_amount=activation_amount)
+
+
 
 @click.command()
 @click.pass_context
@@ -178,6 +188,8 @@ def generate_keys(ctx: click.Context, validator_start_index: int,
 
     # Get chain setting
     chain_setting = devnet_chain_setting if devnet_chain_setting is not None else get_chain_setting(chain)
+
+    amounts = [amount * chain_setting.MULTIPLIER for amount in amounts]
 
     if not os.path.exists(folder):
         os.mkdir(folder)
