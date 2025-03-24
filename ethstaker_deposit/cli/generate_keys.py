@@ -121,15 +121,15 @@ def generate_keys_arguments_decorator(function: Callable[..., Any]) -> Callable[
             callback=captive_prompt_callback(
                 lambda value: validate_yesno(None, None, value),
                 lambda: load_text(['arg_compounding', 'prompt'], func='generate_keys_arguments_decorator'),
-                default="False",
+                default='no',
                 prompt_if=prompt_if_other_exists('withdrawal_address'),
             ),
-            default=False,
+            default='no',
             help=lambda: load_text(['arg_compounding', 'help'], func='generate_keys_arguments_decorator'),
             param_decls='--compounding/--regular-withdrawal',
             prompt=False,  # the callback handles the prompt
             type=bool,
-            show_default=True,
+            show_default='regular-withdrawal',
         ),
         jit_option(
             callback=captive_prompt_callback(
