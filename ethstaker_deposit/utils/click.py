@@ -11,7 +11,7 @@ from typing import (
 from ethstaker_deposit.exceptions import ValidationError
 from ethstaker_deposit.utils import config
 # To work around an issue with disabling language prompt and CLIRunner() isolation
-from ethstaker_deposit.utils.constants import INTL_LANG_OPTIONS
+from ethstaker_deposit.utils.constants import CONTEXT_REQUIRING_PROMPTS, INTL_LANG_OPTIONS, get_min_activation_amount
 from ethstaker_deposit.utils.intl import (
     get_first_options,
 )
@@ -63,6 +63,8 @@ class JITOption(click.Option):
 
     def get_default(self, ctx: click.Context, call: bool = True) -> Any:
         self.default = _value_of(self.callable_default)
+        if self.name == "amount":
+            self.default = get_min_activation_amount(ctx.params.get('chain', 'mainnet'))
         return super().get_default(ctx, call)
 
 
@@ -126,14 +128,25 @@ def prompt_if_other_value(other: str, value: Any) -> Callable[[click.Context, An
     return callback
 
 
+def process_with_optional_context(ctx: click.Context, processing_func: Callable[..., Any],
+                                user_input: str, prompt_marker: str) -> Any:
+    '''
+    Processes the user's input with the optional context if the prompt requires it.
+    '''
+    if prompt_marker in CONTEXT_REQUIRING_PROMPTS:
+        return processing_func(user_input, params=ctx.params)
+    return processing_func(user_input, {})
+
+
 def captive_prompt_callback(
-    processing_func: Callable[[str], Any],
+    processing_func: Callable[[str, dict[str, Any]], Any],
     prompt: Callable[[], str],
     confirmation_prompt: Optional[Callable[[], str]] = None,
     confirmation_mismatch_msg: Callable[[], str] = lambda: '',
     hide_input: bool = False,
     default: Optional[Union[Callable[[], str], str]] = None,
     prompt_if: Optional[Callable[[click.Context, Any, str], bool]] = None,
+    prompt_marker: str = '',
 ) -> Callable[[click.Context, str, str], Any]:
     '''
     Traps the user in a prompt until the value chosen is acceptable
@@ -147,25 +160,30 @@ def captive_prompt_callback(
     entered by the user
     :param prompt_if: the optional callable, prompt if the source of the parameter is from the default value and this
     call returns true
+    :param prompt_marker: the optional marker to indicate the type of prompt, for example "amount"
     '''
     def callback(ctx: click.Context, param: Any, user_input: str) -> Any:
         # the callback is called twice, once for the option prompt and once to verify the input
         # To avoid showing confirmation prompt twice, we introduce a flag to prompt inside
         # the callback
         # See https://github.com/pallets/click/discussions/2673
+        default_value = _value_of(default) if default is not None else param.default
         if (prompt_if is not None
                 and ctx.get_parameter_source(param.name) == click.core.ParameterSource.DEFAULT
                 and prompt_if(ctx, param, user_input)):
-            user_input = click.prompt(prompt(), hide_input=hide_input, default=_value_of(default))
+            user_input = click.prompt(prompt(), hide_input=hide_input, default=default_value)
         if config.non_interactive:
-            return processing_func(user_input)
+            return process_with_optional_context(ctx, processing_func, user_input, prompt_marker)
         while True:
             try:
-                processed_input = processing_func(user_input)
+                processed_input = process_with_optional_context(ctx, processing_func, user_input,
+                                                                prompt_marker)
                 # Logic for confirming user input:
                 if confirmation_prompt is not None and processed_input not in ('', None):
                     confirmation_input = click.prompt(confirmation_prompt(), hide_input=hide_input)
-                    if processing_func(confirmation_input) != processed_input:
+                    processed_value = process_with_optional_context(ctx, processing_func, confirmation_input,
+                                                                    prompt_marker)
+                    if processed_value != processed_input:
                         raise ValidationError(confirmation_mismatch_msg())
                 return processed_input
             except ValidationError as e:

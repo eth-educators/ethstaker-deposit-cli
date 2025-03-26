@@ -16,7 +16,6 @@ EXECUTION_ADDRESS_WITHDRAWAL_PREFIX = bytes.fromhex('01')
 COMPOUNDING_WITHDRAWAL_PREFIX = bytes.fromhex('02')
 
 ETH2GWEI = 10 ** 9
-MIN_DEPOSIT_AMOUNT = 2 ** 0 * ETH2GWEI
 MIN_ACTIVATION_AMOUNT = 2 ** 5 * ETH2GWEI
 MAX_DEPOSIT_AMOUNT = 2 ** 11 * ETH2GWEI
 
@@ -30,6 +29,25 @@ DEFAULT_PARTIAL_DEPOSIT_FOLDER_NAME = 'partial_deposits'
 
 # Internationalisation constants
 INTL_CONTENT_PATH = os.path.join('ethstaker_deposit', 'intl')
+
+
+CHAIN_MIN_ACTIVATION_OVERRIDES: Dict[str, int] = {
+    'chiado': 1 * ETH2GWEI,
+    'gnosis': 1 * ETH2GWEI,
+}
+
+
+CONTEXT_REQUIRING_PROMPTS = [
+    "amount",
+]
+
+
+def get_min_activation_amount(chain: str) -> int:
+    """
+    Returns the minimum activation amount for the specified chain.
+    Defaults to 32 ETH unless overridden for a specific chain.
+    """
+    return CHAIN_MIN_ACTIVATION_OVERRIDES.get(chain, MIN_ACTIVATION_AMOUNT) // ETH2GWEI
 
 
 def _add_index_to_options(d: Dict[str, list[str]]) -> Dict[str, list[str]]:

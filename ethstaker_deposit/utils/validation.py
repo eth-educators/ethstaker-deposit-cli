@@ -42,11 +42,10 @@ from ethstaker_deposit.utils.constants import (
     COMPOUNDING_WITHDRAWAL_PREFIX,
     ETH2GWEI,
     EXECUTION_ADDRESS_WITHDRAWAL_PREFIX,
-    MIN_DEPOSIT_AMOUNT,
     MAX_DEPOSIT_AMOUNT,
 )
 from ethstaker_deposit.utils.crypto import SHA256
-from ethstaker_deposit.settings import BaseChainSetting, get_devnet_chain_setting
+from ethstaker_deposit.settings import BaseChainSetting, get_chain_setting, get_devnet_chain_setting
 
 
 #
@@ -54,7 +53,7 @@ from ethstaker_deposit.settings import BaseChainSetting, get_devnet_chain_settin
 #
 
 
-def verify_deposit_data_json(filefolder: str, credentials: Sequence[Credential]) -> bool:
+def verify_deposit_data_json(filefolder: str, credentials: Sequence[Credential], chain: str) -> bool:
     """
     Validate every deposit found in the deposit-data JSON file folder.
     """
@@ -68,14 +67,15 @@ def verify_deposit_data_json(filefolder: str, credentials: Sequence[Credential])
                            show_percent=False, show_pos=True) as bar:
 
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            for valid_deposit in executor.map(validate_deposit, deposit_json, credentials):
+            chains = [chain] * len(deposit_json)
+            for valid_deposit in executor.map(validate_deposit, deposit_json, chains, credentials):
                 all_valid_deposits &= valid_deposit
                 bar.update(1)
 
     return all_valid_deposits
 
 
-def validate_deposit(deposit_data_dict: Dict[str, Any], credential: Credential = None) -> bool:
+def validate_deposit(deposit_data_dict: Dict[str, Any], chain: str, credential: Credential = None) -> bool:
     '''
     Checks whether a deposit is valid based on the staking deposit rules.
     https://github.com/ethereum/consensus-specs/blob/dev/specs/phase0/beacon-chain.md#deposits
@@ -117,7 +117,9 @@ def validate_deposit(deposit_data_dict: Dict[str, Any], credential: Credential =
         return False
 
     # Verify deposit amount
-    if not MIN_DEPOSIT_AMOUNT <= amount <= MAX_DEPOSIT_AMOUNT:
+    chain_setting = get_chain_setting(chain)
+    min_amount = chain_setting.MIN_DEPOSIT_AMOUNT * ETH2GWEI
+    if not min_amount <= amount <= MAX_DEPOSIT_AMOUNT * chain_setting.MULTIPLIER:
         return False
 
     # Verify deposit signature && pubkey
@@ -198,7 +200,7 @@ def validate_yesno(ctx: click.Context, param: Any, value: str) -> bool:
         raise ValidationError(load_text(['err_invalid_bool_value']))
 
 
-def validate_deposit_amount(amount: str) -> int:
+def validate_deposit_amount(amount: str, **kwargs: Dict[str, Any]) -> int:
     '''
     Verifies that `amount` is a valid gwei denomination and 1 ether <= amount <= MAX_DEPOSIT_AMOUNT gwei
     Amount is expected to be in ether and the returned value will be converted to gwei and represented as an int
@@ -207,13 +209,18 @@ def validate_deposit_amount(amount: str) -> int:
         decimal_ether = Decimal(amount)
         amount_gwei = decimal_ether * Decimal(ETH2GWEI)
 
+        params = kwargs.get('params', {})
+        chain = params.get('chain', 'mainnet')
+        chain_setting = get_chain_setting(chain)
+        min_amount = chain_setting.MIN_DEPOSIT_AMOUNT
+
         if amount_gwei % 1 != 0:
             raise ValidationError(load_text(['err_not_gwei_denomination']))
 
-        if amount_gwei < 1 * ETH2GWEI:
+        if amount_gwei < min_amount * ETH2GWEI:
             raise ValidationError(load_text(['err_min_deposit']))
 
-        if amount_gwei > MAX_DEPOSIT_AMOUNT:
+        if amount_gwei > MAX_DEPOSIT_AMOUNT * chain_setting.MULTIPLIER:
             raise ValidationError(load_text(['err_max_deposit']))
 
         return int(amount_gwei)
@@ -484,17 +491,20 @@ def validate_devnet_chain_setting_json(json_value: str) -> bool:
             raise ValidationError(load_text(['err_devnet_chain_setting_not_object']) + '\n')
 
         required_keys = ('network_name', 'genesis_fork_version', 'exit_fork_version')
+        optional_keys = ('genesis_validator_root', 'multiplier', 'min_deposit_amount')
 
         all_keys = all(key in devnet_chain_setting_dict for key in required_keys)
 
         if not all_keys:
             raise ValidationError(load_text(['err_devnet_chain_setting_missing_keys']) + '\n')
 
-        if len(devnet_chain_setting_dict) not in (3, 4):
+        if len(devnet_chain_setting_dict) not in (3, 4, 5, 6):
             raise ValidationError(load_text(['err_devnet_chain_setting_key_length']) + '\n')
 
-        if len(devnet_chain_setting_dict) == 4 and 'genesis_validator_root' not in devnet_chain_setting_dict:
-            raise ValidationError(load_text(['err_devnet_chain_setting_invalid_fourth_key']) + '\n')
+        allowed_keys = set(required_keys + optional_keys)
+        unknown_keys = set(devnet_chain_setting_dict) - allowed_keys
+        if unknown_keys:
+            raise ValidationError(load_text(['err_devnet_chain_setting_unknown_keys']) + '\n')
 
         return True
     except json.JSONDecodeError:
