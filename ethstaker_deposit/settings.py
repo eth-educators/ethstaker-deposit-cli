@@ -17,13 +17,19 @@ class BaseChainSetting(NamedTuple):
     GENESIS_FORK_VERSION: bytes
     EXIT_FORK_VERSION: bytes  # capella fork version for voluntary exits (EIP-7044)
     GENESIS_VALIDATORS_ROOT: Optional[bytes] = None
+    MULTIPLIER: int = 1
+    MIN_ACTIVATION_AMOUNT: float = 32
+    MIN_DEPOSIT_AMOUNT: float = 1
 
     def __str__(self) -> str:
         gvr_value = self.GENESIS_VALIDATORS_ROOT.hex() if self.GENESIS_VALIDATORS_ROOT is not None else 'None'
         return (f'Network {self.NETWORK_NAME}\n'
                 f'  - Genesis fork version: {self.GENESIS_FORK_VERSION.hex()}\n'
                 f'  - Exit fork version: {self.EXIT_FORK_VERSION.hex()}\n'
-                f'  - Genesis validators root: {gvr_value}')
+                f'  - Genesis validators root: {gvr_value}\n'
+                f'  - Multiplier: {self.MULTIPLIER}\n'
+                f'  - Minimum activation amount: {self.MIN_ACTIVATION_AMOUNT}'
+                f'  - Minimum deposit amount: {self.MIN_DEPOSIT_AMOUNT}')
 
 
 MAINNET = 'mainnet'
@@ -73,13 +79,19 @@ GnosisSetting = BaseChainSetting(
     NETWORK_NAME=GNOSIS,
     GENESIS_FORK_VERSION=bytes.fromhex('00000064'),
     EXIT_FORK_VERSION=bytes.fromhex('03000064'),
-    GENESIS_VALIDATORS_ROOT=bytes.fromhex('f5dcb5564e829aab27264b9becd5dfaa017085611224cb3036f573368dbb9d47'))
+    GENESIS_VALIDATORS_ROOT=bytes.fromhex('f5dcb5564e829aab27264b9becd5dfaa017085611224cb3036f573368dbb9d47'),
+    MULTIPLIER=32,
+    MIN_ACTIVATION_AMOUNT=1,
+    MIN_DEPOSIT_AMOUNT=0.03125)
 # Chiado setting
 ChiadoSetting = BaseChainSetting(
     NETWORK_NAME=CHIADO,
     GENESIS_FORK_VERSION=bytes.fromhex('0000006f'),
     EXIT_FORK_VERSION=bytes.fromhex('0300006f'),
-    GENESIS_VALIDATORS_ROOT=bytes.fromhex('9d642dac73058fbf39c0ae41ab1e34e4d889043cb199851ded7095bc99eb4c1e'))
+    GENESIS_VALIDATORS_ROOT=bytes.fromhex('9d642dac73058fbf39c0ae41ab1e34e4d889043cb199851ded7095bc99eb4c1e'),
+    MULTIPLIER=32,
+    MIN_ACTIVATION_AMOUNT=1,
+    MIN_DEPOSIT_AMOUNT=0.03125)
 
 
 ALL_CHAINS: Dict[str, BaseChainSetting] = {
@@ -102,10 +114,17 @@ def get_chain_setting(chain_name: str = MAINNET) -> BaseChainSetting:
 def get_devnet_chain_setting(network_name: str,
                              genesis_fork_version: str,
                              exit_fork_version: str,
-                             genesis_validator_root: Optional[str]) -> BaseChainSetting:
+                             genesis_validator_root: Optional[str],
+                             multiplier: Optional[int] = 1,
+                             min_activation_amount: Optional[float] = 32,
+                             min_deposit_amount: Optional[float] = 1) -> BaseChainSetting:
+
     return BaseChainSetting(
         NETWORK_NAME=network_name,
         GENESIS_FORK_VERSION=decode_hex(genesis_fork_version),
         EXIT_FORK_VERSION=decode_hex(exit_fork_version),
         GENESIS_VALIDATORS_ROOT=decode_hex(genesis_validator_root) if genesis_validator_root is not None else None,
+        MULTIPLIER=multiplier,
+        MIN_ACTIVATION_AMOUNT=min_activation_amount,
+        MIN_DEPOSIT_AMOUNT=min_deposit_amount,
     )

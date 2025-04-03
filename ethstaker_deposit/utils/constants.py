@@ -16,7 +16,6 @@ EXECUTION_ADDRESS_WITHDRAWAL_PREFIX = bytes.fromhex('01')
 COMPOUNDING_WITHDRAWAL_PREFIX = bytes.fromhex('02')
 
 ETH2GWEI = 10 ** 9
-MIN_DEPOSIT_AMOUNT = 2 ** 0 * ETH2GWEI
 MIN_ACTIVATION_AMOUNT = 2 ** 5 * ETH2GWEI
 MAX_DEPOSIT_AMOUNT = 2 ** 11 * ETH2GWEI
 
@@ -30,6 +29,10 @@ DEFAULT_PARTIAL_DEPOSIT_FOLDER_NAME = 'partial_deposits'
 
 # Internationalisation constants
 INTL_CONTENT_PATH = os.path.join('ethstaker_deposit', 'intl')
+
+CONTEXT_REQUIRING_PROMPTS = [
+    "amount",
+]
 
 
 def _add_index_to_options(d: Dict[str, list[str]]) -> Dict[str, list[str]]:
