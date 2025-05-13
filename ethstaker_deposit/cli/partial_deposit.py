@@ -12,7 +12,7 @@ from typing import Any, Optional
 from ethstaker_deposit.cli.generate_keys import get_default_amount
 from ethstaker_deposit.key_handling.keystore import Keystore
 from ethstaker_deposit.settings import (
-    fake_cli_version,
+    DEPOSIT_CLI_VERSION,
     MAINNET,
     ALL_CHAIN_KEYS,
     get_chain_setting,
@@ -206,7 +206,7 @@ def partial_deposit(
     deposit_data.update({'deposit_data_root': signed_deposit.hash_tree_root})
     deposit_data.update({'fork_version': chain_setting.GENESIS_FORK_VERSION})
     deposit_data.update({'network_name': chain_setting.NETWORK_NAME})
-    deposit_data.update({'deposit_cli_version': fake_cli_version})
+    deposit_data.update({'deposit_cli_version': DEPOSIT_CLI_VERSION})
     saved_folder = export_deposit_data_json(folder, time.time(), [deposit_data])
 
     click.echo(load_text(['msg_verify_partial_deposit']))
